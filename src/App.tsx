@@ -1,42 +1,59 @@
-import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 import { search } from './api';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import './App.css';
 
-import type { ChangeEvent, FormEvent } from 'react';
+const formSchema = z.object({
+  searchValue: z.string().trim().min(1),
+});
 
 function App() {
-  const [asset, setAsset] = useState('');
-  // const [searchResults, setSearchResults] = useState([]);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      searchValue: '',
+    },
+  });
 
-  const handleChange = ({ target }: ChangeEvent<HTMLInputElement>) => {
-    setAsset(target.value);
-  };
-
-  const handleOnSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    const trimmedAsset = asset.trim();
-
+  async function onSubmit({ searchValue }: z.infer<typeof formSchema>) {
     try {
-      const assets = await search(trimmedAsset);
+      const assets = await search(searchValue);
       console.log(assets);
     } catch (err) {
       console.log(err);
     }
-  };
+  }
 
   return (
-    <form onSubmit={handleOnSubmit}>
-      <input
-        id="asset"
-        name="asset"
-        placeholder="Enter a product name or ISIN"
-        value={asset}
-        onChange={handleChange}
-      />
-      <button type="submit" disabled={asset.trim().length === 0}>
-        Search
-      </button>
-    </form>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex items-center"
+      >
+        <FormField
+          control={form.control}
+          name="searchValue"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input placeholder="Enter a product name or ISIN" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <Button
+          type="submit"
+          disabled={form.getFieldState('searchValue').invalid}
+          className="mx-4"
+        >
+          Search
+        </Button>
+      </form>
+    </Form>
   );
 }
 
