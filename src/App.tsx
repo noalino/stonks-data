@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { search } from './api';
 import './App.css';
 
 import type { ChangeEvent, FormEvent } from 'react';
@@ -10,10 +11,16 @@ function App() {
     setAsset(target.value);
   };
 
-  const handleOnSubmit = (event: FormEvent) => {
+  const handleOnSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    // Should trim asset string
-    console.log('onSubmit', event);
+    const trimmedAsset = asset.trim();
+
+    try {
+      const assets = await search(trimmedAsset);
+      console.log(assets);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
