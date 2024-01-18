@@ -6,6 +6,7 @@ import type { ChangeEvent, FormEvent } from 'react';
 
 function App() {
   const [asset, setAsset] = useState('');
+  // const [searchResults, setSearchResults] = useState([]);
 
   const handleChange = ({ target }: ChangeEvent<HTMLInputElement>) => {
     setAsset(target.value);

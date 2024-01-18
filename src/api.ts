@@ -13,20 +13,22 @@ type SearchMatch = {
 type SearchResponse = {
   bestMatches: SearchMatch[];
 };
-
+/* eslint-disable */
 const API_URL = 'https://www.alphavantage.co/query?';
 
 export async function search(
   value: string
 ): Promise<SearchResponse['bestMatches']> {
   const FUNCTION = 'SYMBOL_SEARCH';
-  const url = `${API_URL}function=${FUNCTION}&keywords=${value}&apikey=${import.meta.env.VITE_API_KEY}`;
+  // const url = `${API_URL}function=${FUNCTION}&keywords=${value}&apikey=${import.meta.env.VITE_API_KEY}`;
+  const url = 'http://localhost:8000/search-results.json';
 
   try {
     const data = await fetch(url);
     const results = await data.json();
     return results['bestMatches'];
   } catch (err) {
+    console.log(err);
     return [];
   }
 }
