@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { search } from './api';
@@ -12,12 +13,14 @@ const formSchema = z.object({
 });
 
 function App() {
+  const [disabled, setDisabled] = useState(true);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       searchValue: '',
     },
   });
+  const { control, handleSubmit, watch } = form;
 
   async function onSubmit({ searchValue }: z.infer<typeof formSchema>) {
     try {
@@ -28,14 +31,18 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    const subscription = watch((value) => {
+      setDisabled(value.searchValue?.length === 0 ?? true);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="flex items-center"
-      >
+      <form onSubmit={handleSubmit(onSubmit)} className="flex">
         <FormField
-          control={form.control}
+          control={control}
           name="searchValue"
           render={({ field }) => (
             <FormItem>
@@ -45,11 +52,7 @@ function App() {
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          disabled={form.getFieldState('searchValue').invalid}
-          className="mx-4"
-        >
+        <Button type="submit" disabled={disabled} className="ml-4">
           Search
         </Button>
       </form>
