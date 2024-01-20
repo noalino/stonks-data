@@ -60,6 +60,7 @@ function App() {
                     <FormControl>
                       <Input
                         placeholder="Enter a product name or ISIN"
+                        autoComplete="off"
                         {...field}
                       />
                     </FormControl>
