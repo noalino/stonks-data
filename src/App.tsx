@@ -76,12 +76,12 @@ function App() {
         </Form>
 
         {searchMatches.length > 0 && (
-          <PopoverContent className="w-96">
+          <PopoverContent className="w-96 max-h-60 px-0 overflow-x-auto">
             <ul role="list" className="divide-y divide-gray-100">
               {searchMatches.map((value) => (
                 <li
                   key={value['1. symbol']}
-                  className="flex justify-between gap-x-6 py-2"
+                  className="flex justify-between gap-x-6 px-4 py-2"
                 >
                   <p className="font-bold">{value['1. symbol']}</p>
                   <p>{value['2. name']}</p>
