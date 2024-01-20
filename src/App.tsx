@@ -81,10 +81,10 @@ function App() {
               {searchMatches.map((value) => (
                 <button
                   key={value['1. symbol']}
-                  className="flex w-full justify-between gap-x-6 px-4 py-2 hover:bg-slate-300"
+                  className="flex w-full items-center justify-between gap-x-6 px-4 py-2 hover:bg-slate-300"
                 >
                   <p className="font-bold">{value['1. symbol']}</p>
-                  <p>{value['2. name']}</p>
+                  <p className="text-end">{value['2. name']}</p>
                 </button>
               ))}
             </ul>
