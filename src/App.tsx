@@ -41,7 +41,7 @@ function App() {
 
   useEffect(() => {
     const subscription = watch((value) => {
-      setDisabled(value.searchValue?.length === 0 ?? true);
+      setDisabled(!value.searchValue?.trim().length);
     });
     return () => subscription.unsubscribe();
   }, [watch]);
