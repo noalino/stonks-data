@@ -1,7 +1,9 @@
 import { useCallback, useState } from 'react';
 
 import { search } from './api';
-import AutoComplete, { type AutoCompleteListItem } from './AutoComplete';
+import AutoComplete, {
+  type AutoCompleteListItem,
+} from '@/components/custom/autocomplete/AutoComplete';
 
 function App() {
   const [searchResults, setSearchResults] = useState<AutoCompleteListItem[]>(

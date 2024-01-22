@@ -6,16 +6,12 @@ import {
   useState,
   type ChangeEvent,
 } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
 import useDebounce from '@/hooks/useDebounce';
+import EmptyView from './EmptyView';
+import LoadingView from './LoadingView';
+import ListView from './ListView';
 
 export type AutoCompleteListItem = Record<'label' | 'value', string>;
-
-enum ViewState {
-  loading,
-  empty,
-  success,
-}
 
 type AutoCompleteProps = {
   emptyMessage: string;
@@ -25,6 +21,12 @@ type AutoCompleteProps = {
   onInputValueChange?: (value: string) => void;
   placeholder: string;
 };
+
+enum ViewState {
+  loading,
+  empty,
+  success,
+}
 
 function AutoComplete({
   emptyMessage,
@@ -61,55 +63,26 @@ function AutoComplete({
     setIsInputFocus(false);
   }, []);
 
-  const LoadingView = () => (
-    <div className="ring-1 ring-slate-200 rounded-lg p-1">
-      <Skeleton className="h-8 w-full" />
-    </div>
+  const handleMouseDown = useCallback(
+    (value: AutoCompleteListItem['value']) => {
+      inputRef.current?.blur();
+      setInputValue(value);
+    },
+    []
   );
 
-  const NoResultsView = () => (
-    <p className="ring-1 ring-slate-200 rounded-lg px-2 py-3 text-sm text-center">
-      {emptyMessage}
-    </p>
-  );
-
-  const handleMouseDown = (value: AutoCompleteListItem['value']) => {
-    inputRef.current?.blur();
-    setInputValue(value);
-  };
-
-  const ListView = () => (
-    <ul
-      role="list"
-      className="w-full max-h-60 ring-1 ring-slate-200 rounded-lg divide-y divide-slate-100 overflow-hidden overflow-y-auto"
-    >
-      {list.map((item) => {
-        return (
-          <li
-            key={item.value}
-            value={item.value}
-            className="flex items-center justify-between px-4 py-2 hover:bg-slate-300 cursor-default"
-          >
-            <p className="font-bold">{item.value}</p>
-            <p className="text-end">{item.label}</p>
-          </li>
-        );
-      })}
-    </ul>
-  );
-
-  const Results = () => {
+  const Results = useCallback(() => {
     if (isOpen) {
       switch (viewState) {
         case ViewState.loading:
           return <LoadingView />;
         case ViewState.empty:
-          return <NoResultsView />;
+          return <EmptyView message={emptyMessage} />;
         case ViewState.success:
-          return <ListView />;
+          return <ListView list={list} onListItemMouseDown={handleMouseDown} />;
       }
     }
-  };
+  }, [isOpen, viewState, emptyMessage, list, handleMouseDown]);
 
   useEffect(() => {
     onDebouncedValueChange?.(debouncedValue);
