@@ -39,6 +39,7 @@ function AutoComplete({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [inputValue, setInputValue] = useState('');
+  const [selectedItem, setSelectedItem] = useState<AutoCompleteListItem>();
   const [isOpen, setIsOpen] = useState(false);
   const [isInputFocus, setIsInputFocus] = useState<boolean>();
   const [viewState, setViewState] = useState<ViewState>();
@@ -63,13 +64,11 @@ function AutoComplete({
     setIsInputFocus(false);
   }, []);
 
-  const handleMouseDown = useCallback(
-    (value: AutoCompleteListItem['value']) => {
-      inputRef.current?.blur();
-      setInputValue(value);
-    },
-    []
-  );
+  const handleMouseDown = useCallback((item: AutoCompleteListItem) => {
+    inputRef.current?.blur();
+    setInputValue(item.value);
+    setSelectedItem(item);
+  }, []);
 
   const Results = useCallback(() => {
     if (isOpen) {
@@ -79,10 +78,16 @@ function AutoComplete({
         case ViewState.empty:
           return <EmptyView message={emptyMessage} />;
         case ViewState.success:
-          return <ListView list={list} onListItemMouseDown={handleMouseDown} />;
+          return (
+            <ListView
+              list={list}
+              selectedItem={selectedItem}
+              onListItemMouseDown={handleMouseDown}
+            />
+          );
       }
     }
-  }, [isOpen, viewState, emptyMessage, list, handleMouseDown]);
+  }, [isOpen, viewState, emptyMessage, list, selectedItem, handleMouseDown]);
 
   useEffect(() => {
     onDebouncedValueChange?.(debouncedValue);
@@ -116,7 +121,7 @@ function AutoComplete({
           className="w-full p-2 bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
         />
       </div>
-      <div className="w-[320px] absolute left-1/2 -translate-x-1/2 mt-2">
+      <div className="w-[340px] absolute left-1/2 -translate-x-1/2 mt-2">
         <Results />
       </div>
     </div>
