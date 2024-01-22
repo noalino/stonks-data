@@ -1,5 +1,11 @@
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { useCallback, useEffect, useState, type ChangeEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import useDebounce from '@/hooks/useDebounce';
 
@@ -28,8 +34,11 @@ function AutoComplete({
   onInputValueChange,
   placeholder,
 }: AutoCompleteProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isInputFocus, setIsInputFocus] = useState<boolean>();
   const [viewState, setViewState] = useState<ViewState>();
   const debouncedValue = useDebounce(inputValue);
 
@@ -44,7 +53,13 @@ function AutoComplete({
 
   const handleInputFocus = useCallback(() => {
     setIsOpen(inputValue.length > 0);
+    setIsInputFocus(true);
   }, [inputValue]);
+
+  const handleInputBlur = useCallback(() => {
+    setIsOpen(false);
+    setIsInputFocus(false);
+  }, []);
 
   const LoadingView = () => (
     <div className="ring-1 ring-slate-200 rounded-lg p-1">
@@ -57,6 +72,11 @@ function AutoComplete({
       {emptyMessage}
     </p>
   );
+
+  const handleMouseDown = (value: AutoCompleteListItem['value']) => {
+    inputRef.current?.blur();
+    setInputValue(value);
+  };
 
   const ListView = () => (
     <ul
@@ -96,7 +116,7 @@ function AutoComplete({
   }, [debouncedValue, onDebouncedValueChange]);
 
   useEffect(() => {
-    setIsOpen(inputValue.length > 0);
+    setIsOpen(!!isInputFocus && inputValue.length > 0);
 
     if (isLoading) {
       setViewState(ViewState.loading);
@@ -105,17 +125,18 @@ function AutoComplete({
     } else if (inputValue.length > 0) {
       setViewState(ViewState.empty);
     }
-  }, [inputValue, isLoading, list]);
+  }, [inputValue, isInputFocus, isLoading, list]);
 
   return (
     <div className="relative">
       <div className="flex h-12 items-center rounded-md border border-input bg-white pl-3 text-md ring-offset-background focus-within:ring-1 focus-within:ring-ring">
         <MagnifyingGlassIcon className="mr-2 h-6 w-6 shrink-0 opacity-50" />
         <input
+          ref={inputRef}
           type="search"
           value={inputValue}
           onChange={handleInputChange}
-          onBlur={() => setIsOpen(false)}
+          onBlur={handleInputBlur}
           onFocus={handleInputFocus}
           placeholder={placeholder}
           autoComplete="off"

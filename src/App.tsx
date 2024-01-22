@@ -49,7 +49,7 @@ function App() {
         isLoading={isLoading}
         onInputValueChange={handleInputValueChange}
         onDebouncedValueChange={handleDebounceValueChange}
-        placeholder="Enter a symbol"
+        placeholder="Symbol"
         emptyMessage="No Results Found."
       />
     </div>
