@@ -5,6 +5,12 @@ import useDebounce from '@/hooks/useDebounce';
 
 export type AutoCompleteListItem = Record<'label' | 'value', string>;
 
+enum ViewState {
+  loading,
+  empty,
+  success,
+}
+
 type AutoCompleteProps = {
   emptyMessage: string;
   isLoading: boolean;
@@ -24,8 +30,7 @@ function AutoComplete({
 }: AutoCompleteProps) {
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [showList, setShowList] = useState(false);
-  const [showNoResults, setShowNoResults] = useState(false);
+  const [viewState, setViewState] = useState<ViewState>();
   const debouncedValue = useDebounce(inputValue);
 
   const handleInputChange = useCallback(
@@ -36,6 +41,10 @@ function AutoComplete({
     },
     [onInputValueChange]
   );
+
+  const handleInputFocus = useCallback(() => {
+    setIsOpen(inputValue.length > 0);
+  }, [inputValue]);
 
   const LoadingView = () => (
     <div className="ring-1 ring-slate-200 rounded-lg p-1">
@@ -71,14 +80,13 @@ function AutoComplete({
 
   const Results = () => {
     if (isOpen) {
-      if (isLoading) {
-        return <LoadingView />;
-      }
-      if (showList) {
-        return <ListView />;
-      }
-      if (showNoResults) {
-        return <NoResultsView />;
+      switch (viewState) {
+        case ViewState.loading:
+          return <LoadingView />;
+        case ViewState.empty:
+          return <NoResultsView />;
+        case ViewState.success:
+          return <ListView />;
       }
     }
   };
@@ -88,12 +96,15 @@ function AutoComplete({
   }, [debouncedValue, onDebouncedValueChange]);
 
   useEffect(() => {
-    setShowList(list.length > 0 && !isLoading);
-  }, [list, isLoading]);
+    setIsOpen(inputValue.length > 0);
 
-  useEffect(() => {
-    setShowList(list.length > 0 && !isLoading);
-    setShowNoResults(inputValue.length > 0 && list.length === 0 && !isLoading);
+    if (isLoading) {
+      setViewState(ViewState.loading);
+    } else if (list.length > 0) {
+      setViewState(ViewState.success);
+    } else if (inputValue.length > 0) {
+      setViewState(ViewState.empty);
+    }
   }, [inputValue, isLoading, list]);
 
   return (
@@ -105,7 +116,7 @@ function AutoComplete({
           value={inputValue}
           onChange={handleInputChange}
           onBlur={() => setIsOpen(false)}
-          onFocus={() => setIsOpen(true)}
+          onFocus={handleInputFocus}
           placeholder={placeholder}
           autoComplete="off"
           className="w-full p-2 bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
