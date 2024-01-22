@@ -23,6 +23,7 @@ function AutoComplete({
   placeholder,
 }: AutoCompleteProps) {
   const [inputValue, setInputValue] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
   const [showList, setShowList] = useState(false);
   const [showNoResults, setShowNoResults] = useState(false);
   const debouncedValue = useDebounce(inputValue);
@@ -69,14 +70,16 @@ function AutoComplete({
   );
 
   const Results = () => {
-    if (isLoading) {
-      return <LoadingView />;
-    }
-    if (showList) {
-      return <ListView />;
-    }
-    if (showNoResults) {
-      return <NoResultsView />;
+    if (isOpen) {
+      if (isLoading) {
+        return <LoadingView />;
+      }
+      if (showList) {
+        return <ListView />;
+      }
+      if (showNoResults) {
+        return <NoResultsView />;
+      }
     }
   };
 
@@ -101,6 +104,8 @@ function AutoComplete({
           type="search"
           value={inputValue}
           onChange={handleInputChange}
+          onBlur={() => setIsOpen(false)}
+          onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
           autoComplete="off"
           className="w-full p-2 bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
