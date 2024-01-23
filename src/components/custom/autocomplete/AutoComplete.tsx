@@ -17,8 +17,10 @@ type AutoCompleteProps = {
   emptyMessage: string;
   isLoading: boolean;
   list: AutoCompleteListItem[];
+  name?: string;
   onDebouncedValueChange?: (value: string) => void;
-  onInputValueChange?: (value: string) => void;
+  onInputValueChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+  onSelectChange?: (value: string) => void;
   placeholder: string;
 };
 
@@ -32,8 +34,10 @@ function AutoComplete({
   emptyMessage,
   isLoading,
   list,
+  name,
   onDebouncedValueChange,
   onInputValueChange,
+  onSelectChange,
   placeholder,
 }: AutoCompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,9 +51,9 @@ function AutoComplete({
 
   const handleInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      const { value } = event.target;
-      setInputValue(value);
-      onInputValueChange?.(value);
+      setInputValue(event.target.value);
+      onInputValueChange?.(event);
+      setSelectedItem(undefined);
     },
     [onInputValueChange]
   );
@@ -64,11 +68,15 @@ function AutoComplete({
     setIsInputFocus(false);
   }, []);
 
-  const handleMouseDown = useCallback((item: AutoCompleteListItem) => {
-    inputRef.current?.blur();
-    setInputValue(item.value);
-    setSelectedItem(item);
-  }, []);
+  const handleMouseDown = useCallback(
+    (item: AutoCompleteListItem) => {
+      inputRef.current?.blur();
+      setInputValue(item.value);
+      setSelectedItem(item);
+      onSelectChange?.(item.value);
+    },
+    [onSelectChange]
+  );
 
   const Results = useCallback(() => {
     if (isOpen) {
@@ -106,12 +114,13 @@ function AutoComplete({
   }, [inputValue, isInputFocus, isLoading, list]);
 
   return (
-    <div className="relative">
-      <div className="flex h-12 items-center rounded-md border border-input bg-white pl-3 text-md ring-offset-background focus-within:ring-1 focus-within:ring-ring">
+    <div className="relative w-[340px] h-full">
+      <div className="flex h-full items-center rounded-md border border-input bg-white pl-3 text-md ring-offset-background focus-within:ring-1 focus-within:ring-ring">
         <MagnifyingGlassIcon className="mr-2 h-6 w-6 shrink-0 opacity-50" />
         <input
           ref={inputRef}
           type="search"
+          name={name}
           value={inputValue}
           onChange={handleInputChange}
           onBlur={handleInputBlur}
@@ -121,7 +130,7 @@ function AutoComplete({
           className="w-full p-2 bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
         />
       </div>
-      <div className="w-[340px] absolute left-1/2 -translate-x-1/2 mt-2">
+      <div className="w-full mt-2 absolute left-1/2 -translate-x-1/2">
         <Results />
       </div>
     </div>
