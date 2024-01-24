@@ -9,7 +9,7 @@ import AutoComplete, {
   type AutoCompleteListItem,
   type ForwardInputRef,
 } from '@/components/custom/autocomplete/AutoComplete';
-import { search } from './api';
+import { monthlyTimeSeries, search } from './api';
 
 const formSchema = z.object({
   symbol: z.string().trim().min(1),
@@ -17,6 +17,7 @@ const formSchema = z.object({
 
 function App() {
   const searchAbortControllerRef = useRef<AbortController>();
+  const timeSeriesAbortControllerRef = useRef<AbortController>();
   const autoCompleteRef = useRef<ForwardInputRef>(null);
   const [searchResults, setSearchResults] = useState<AutoCompleteListItem[]>(
     []
@@ -78,7 +79,24 @@ function App() {
   const onSubmit = useCallback(
     async ({ symbol }: z.infer<typeof formSchema>) => {
       autoCompleteRef.current?.blur();
-      // Get historical data
+
+      if (timeSeriesAbortControllerRef.current) {
+        timeSeriesAbortControllerRef.current.abort();
+      }
+
+      const newTimeSeriesAbortController = new AbortController();
+      timeSeriesAbortControllerRef.current = newTimeSeriesAbortController;
+
+      try {
+        const rawResults = await monthlyTimeSeries(
+          symbol,
+          newTimeSeriesAbortController.signal
+        );
+        // Transform rawResults to display in table
+        // Set data from useState here
+      } catch {
+        // Handle error
+      }
     },
     []
   );
@@ -88,6 +106,9 @@ function App() {
       // Cleanup
       if (searchAbortControllerRef.current) {
         searchAbortControllerRef.current.abort();
+      }
+      if (timeSeriesAbortControllerRef.current) {
+        timeSeriesAbortControllerRef.current.abort();
       }
     };
   }, []);

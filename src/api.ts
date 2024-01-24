@@ -10,15 +10,16 @@ export type SearchMatch = {
   '9. matchScore': string;
 };
 
-export type MonthlyTimeSeries = {
-  string: {
+export type MonthlyTimeSeries = Record<
+  string,
+  {
     '1. open': string;
     '2. high': string;
     '3. low': string;
     '4. close': string;
     '5. volume': string;
-  };
-};
+  }
+>;
 
 type SearchResponse = {
   bestMatches: SearchMatch[];
@@ -63,17 +64,27 @@ export async function search(
 }
 
 export async function monthlyTimeSeries(
-  symbol: string
+  symbol: string,
+  signal: AbortSignal
 ): Promise<MonthlyTimeSeriesResponse['Monthly Time Series'] | undefined> {
   const FUNCTION = 'TIME_SERIES_MONTHLY';
   const url = `${API_URL}function=${FUNCTION}&symbol=${symbol}&apikey=${import.meta.env.VITE_API_KEY}`;
 
   try {
-    const data = await fetch(url);
-    const results = await data.json();
-    return results['Monthly Time Series'];
+    const res = await fetch(url, { signal: signal });
+    if (!signal.aborted) {
+      if (res.ok) {
+        const results = await res.json();
+        return results['Monthly Time Series'];
+      } else {
+        console.error(`HTTP error, status: ${res.status}`);
+      }
+    }
+    return {};
   } catch (err) {
-    console.log(err);
-    return;
+    if (!signal.aborted) {
+      console.error(err);
+      throw err;
+    }
   }
 }
