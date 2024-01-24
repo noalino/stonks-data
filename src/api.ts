@@ -75,15 +75,25 @@ export async function monthlyTimeSeries(
     if (!signal.aborted) {
       if (res.ok) {
         const results = await res.json();
+
+        if (results['Error Message']) {
+          throw new Error(
+            'Invalid symbol. Please enter a valid symbol and try again.'
+          );
+        }
+
         return results['Monthly Time Series'];
       } else {
         console.error(`HTTP error, status: ${res.status}`);
+        throw new Error(
+          'Unable to fulfill the request. Please try again later.'
+        );
       }
     }
     return {};
   } catch (err) {
     if (!signal.aborted) {
-      console.error(err);
+      console.error('monthlyTimeSeries error:', err);
       throw err;
     }
   }

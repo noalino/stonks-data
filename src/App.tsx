@@ -24,6 +24,7 @@ function App() {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitDisabled, setIiSubmitDisabled] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string>();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -77,6 +78,7 @@ function App() {
   const onSubmit = useCallback(
     async ({ symbol }: z.infer<typeof formSchema>) => {
       autoCompleteRef.current?.blur();
+      setErrorMessage(undefined);
 
       timeSeriesAbortControllerRef.current?.abort();
 
@@ -90,8 +92,12 @@ function App() {
         );
         // Transform rawResults to display in table
         // Set data from useState here
-      } catch {
-        // Handle error
+      } catch (err) {
+        if (typeof err === 'string') {
+          setErrorMessage(err);
+        } else if (err instanceof Error) {
+          setErrorMessage(err.message);
+        }
       }
     },
     []
@@ -107,43 +113,48 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
-      <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex h-12">
-          <FormField
-            control={control}
-            name="symbol"
-            render={({ field }) => {
-              return (
-                <FormItem>
-                  <FormControl>
-                    <AutoComplete
-                      ref={autoCompleteRef}
-                      list={searchResults}
-                      isLoading={isLoading}
-                      onInputValueChange={(event) => {
-                        handleInputValueChange(event.target.value);
-                        field.onChange(event);
-                      }}
-                      onDebouncedValueChange={handleDebounceValueChange}
-                      onSelectChange={handleSelectChange}
-                      name={field.name}
-                      placeholder="Symbol"
-                      emptyMessage="No Results Found."
-                    />
-                  </FormControl>
-                </FormItem>
-              );
-            }}
-          />
-          <Button
-            type="submit"
-            disabled={isSubmitDisabled}
-            className="h-full ml-4"
-          >
-            GO
-          </Button>
-        </form>
-      </Form>
+      <div className="relative">
+        <Form {...form}>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex h-12">
+            <FormField
+              control={control}
+              name="symbol"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormControl>
+                      <AutoComplete
+                        ref={autoCompleteRef}
+                        list={searchResults}
+                        isLoading={isLoading}
+                        onInputValueChange={(event) => {
+                          handleInputValueChange(event.target.value);
+                          field.onChange(event);
+                        }}
+                        onDebouncedValueChange={handleDebounceValueChange}
+                        onSelectChange={handleSelectChange}
+                        name={field.name}
+                        placeholder="Symbol"
+                        emptyMessage="No Results Found."
+                      />
+                    </FormControl>
+                  </FormItem>
+                );
+              }}
+            />
+            <Button
+              type="submit"
+              disabled={isSubmitDisabled}
+              className="h-full ml-4"
+            >
+              GO
+            </Button>
+          </form>
+        </Form>
+        {!!errorMessage && (
+          <p className="absolute text-red-500">{errorMessage}</p>
+        )}
+      </div>
     </div>
   );
 }

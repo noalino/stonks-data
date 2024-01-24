@@ -149,7 +149,7 @@ const AutoComplete = forwardRef<ForwardInputRef, AutoCompleteProps>(
             className="w-full p-2 bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
-        <div className="w-full mt-2 absolute left-1/2 -translate-x-1/2">
+        <div className="w-full mt-2 bg-white absolute left-1/2 -translate-x-1/2 z-10">
           <Results />
         </div>
       </div>
