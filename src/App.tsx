@@ -36,7 +36,7 @@ function App() {
   const handleInputValueChange = useCallback((value: string) => {
     searchAbortControllerRef.current?.abort();
 
-    if (!value?.length) {
+    if (!value?.length || value.trim().length === 0) {
       setSearchResults([]);
       setIsLoading(false);
       setIiSubmitDisabled(true);
