@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import AutoComplete, {
   type AutoCompleteListItem,
+  type ForwardInputRef,
 } from '@/components/custom/autocomplete/AutoComplete';
 import { search } from './api';
 
@@ -15,6 +16,7 @@ const formSchema = z.object({
 });
 
 function App() {
+  const autoCompleteRef = useRef<ForwardInputRef>(null);
   const [searchResults, setSearchResults] = useState<AutoCompleteListItem[]>(
     []
   );
@@ -71,6 +73,7 @@ function App() {
 
   const onSubmit = useCallback(
     async ({ symbol }: z.infer<typeof formSchema>) => {
+      autoCompleteRef.current?.blur();
       // Get historical data
     },
     []
@@ -88,6 +91,7 @@ function App() {
                 <FormItem>
                   <FormControl>
                     <AutoComplete
+                      ref={autoCompleteRef}
                       list={searchResults}
                       isLoading={isLoading}
                       onInputValueChange={(event) => {
