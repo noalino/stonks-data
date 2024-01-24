@@ -33,9 +33,7 @@ function App() {
   const { control, handleSubmit, setValue } = form;
 
   const handleInputValueChange = useCallback((value: string) => {
-    if (searchAbortControllerRef.current) {
-      searchAbortControllerRef.current.abort();
-    }
+    searchAbortControllerRef.current?.abort();
 
     if (!value?.length) {
       setSearchResults([]);
@@ -80,9 +78,7 @@ function App() {
     async ({ symbol }: z.infer<typeof formSchema>) => {
       autoCompleteRef.current?.blur();
 
-      if (timeSeriesAbortControllerRef.current) {
-        timeSeriesAbortControllerRef.current.abort();
-      }
+      timeSeriesAbortControllerRef.current?.abort();
 
       const newTimeSeriesAbortController = new AbortController();
       timeSeriesAbortControllerRef.current = newTimeSeriesAbortController;
@@ -104,12 +100,8 @@ function App() {
   useEffect(() => {
     return () => {
       // Cleanup
-      if (searchAbortControllerRef.current) {
-        searchAbortControllerRef.current.abort();
-      }
-      if (timeSeriesAbortControllerRef.current) {
-        timeSeriesAbortControllerRef.current.abort();
-      }
+      searchAbortControllerRef.current?.abort();
+      timeSeriesAbortControllerRef.current?.abort();
     };
   }, []);
 
