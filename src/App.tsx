@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -16,6 +16,7 @@ const formSchema = z.object({
 });
 
 function App() {
+  const searchAbortControllerRef = useRef<AbortController>();
   const autoCompleteRef = useRef<ForwardInputRef>(null);
   const [searchResults, setSearchResults] = useState<AutoCompleteListItem[]>(
     []
@@ -31,6 +32,10 @@ function App() {
   const { control, handleSubmit, setValue } = form;
 
   const handleInputValueChange = useCallback((value: string) => {
+    if (searchAbortControllerRef.current) {
+      searchAbortControllerRef.current.abort();
+    }
+
     if (!value?.length) {
       setSearchResults([]);
       setIsLoading(false);
@@ -41,27 +46,26 @@ function App() {
     setIiSubmitDisabled(false);
   }, []);
 
-  const handleDebounceValueChange = useCallback((value: string) => {
+  const handleDebounceValueChange = useCallback(async (value: string) => {
     if (!value?.length) {
       return;
     }
 
-    const searchSymbols = async () => {
-      try {
-        const rawResults = await search(value);
-        const results = rawResults.map((item) => ({
-          label: item['2. name'],
-          value: item['1. symbol'],
-        }));
-        setSearchResults(results);
-      } catch {
-        setSearchResults([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    const newSearchAbortController = new AbortController();
+    searchAbortControllerRef.current = newSearchAbortController;
 
-    searchSymbols();
+    try {
+      const rawResults = await search(value, newSearchAbortController.signal);
+      const results = rawResults?.map((item) => ({
+        label: item['2. name'],
+        value: item['1. symbol'],
+      }));
+      setSearchResults(results || []);
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const handleSelectChange = useCallback(
@@ -78,6 +82,15 @@ function App() {
     },
     []
   );
+
+  useEffect(() => {
+    return () => {
+      // Cleanup
+      if (searchAbortControllerRef.current) {
+        searchAbortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">

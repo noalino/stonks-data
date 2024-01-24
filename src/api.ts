@@ -37,18 +37,28 @@ type MonthlyTimeSeriesResponse = {
 const API_URL = 'https://www.alphavantage.co/query?';
 
 export async function search(
-  value: string
-): Promise<SearchResponse['bestMatches']> {
+  value: string,
+  signal: AbortSignal
+): Promise<SearchResponse['bestMatches'] | undefined> {
   const FUNCTION = 'SYMBOL_SEARCH';
   const url = `${API_URL}function=${FUNCTION}&keywords=${value}&apikey=${import.meta.env.VITE_API_KEY}`;
 
   try {
-    const data = await fetch(url);
-    const results = await data.json();
-    return results['bestMatches'];
-  } catch (err) {
-    console.log(err);
+    const res = await fetch(url, { signal: signal });
+    if (!signal.aborted) {
+      if (res.ok) {
+        const results = await res.json();
+        return results['bestMatches'];
+      } else {
+        console.error(`HTTP error, status: ${res.status}`);
+      }
+    }
     return [];
+  } catch (err) {
+    if (!signal.aborted) {
+      console.error(err);
+      throw err;
+    }
   }
 }
 
