@@ -93,7 +93,7 @@ function App() {
           newTimeSeriesAbortController.signal
         );
         const results = Object.entries(rawResults ?? []);
-        setTableData(results.filter((_, index) => index < 25));
+        setTableData(results);
       } catch (err) {
         if (typeof err === 'string') {
           setErrorMessage(err);
