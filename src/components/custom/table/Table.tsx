@@ -1,11 +1,4 @@
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  DoubleArrowLeftIcon,
-  DoubleArrowRightIcon,
-} from '@radix-ui/react-icons';
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -17,6 +10,7 @@ import {
 } from '@/components/ui/table';
 import { type DataItem } from '@/api';
 import { formatCellValue } from '@/lib/utils';
+import TablePagination from './TablePagination';
 
 type TableProps = {
   data: [string, DataItem][];
@@ -26,11 +20,8 @@ type TableProps = {
 const CAPTION = 'Monthly Prices (open, high, low, close) and Volumes';
 
 function CustomTable({ data, numberOfRows = 25 }: TableProps) {
-  const pageCount = Math.ceil(data.length / numberOfRows);
   const [rows, setRows] = useState<[string, DataItem][]>([]);
   const [page, setPage] = useState(1);
-  const [canPreviousPage, setCanPreviousPage] = useState(false);
-  const [canNextPage, setCanNextPage] = useState(false);
 
   useEffect(() => {
     setRows(
@@ -39,8 +30,6 @@ function CustomTable({ data, numberOfRows = 25 }: TableProps) {
           index >= numberOfRows * (page - 1) && index < numberOfRows * page
       )
     );
-    setCanPreviousPage(page > 1);
-    setCanNextPage(data.length - page * numberOfRows > 0);
   }, [data, numberOfRows, page]);
 
   return (
@@ -60,7 +49,7 @@ function CustomTable({ data, numberOfRows = 25 }: TableProps) {
           </TableHeader>
           <TableBody>
             {rows.map(([date, value]) => (
-              <TableRow>
+              <TableRow key={date}>
                 <TableCell className="font-medium">{date}</TableCell>
                 <TableCell className="text-right">
                   {formatCellValue(value['1. open'])}
@@ -84,47 +73,12 @@ function CustomTable({ data, numberOfRows = 25 }: TableProps) {
       </div>
 
       {data.length > numberOfRows && (
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <Button
-            variant="outline"
-            className="h-8 w-8 p-0"
-            onClick={() => setPage(1)}
-            disabled={!canPreviousPage}
-          >
-            <span className="sr-only">Go to first page</span>
-            <DoubleArrowLeftIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage(page - 1)}
-            disabled={!canPreviousPage}
-          >
-            <span className="sr-only">Go to previous page</span>
-            <ChevronLeftIcon className="h-4 w-4" />
-          </Button>
-          <div className="text-sm">
-            Page {page} / {pageCount}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage(page + 1)}
-            disabled={!canNextPage}
-          >
-            <span className="sr-only">Go to next page</span>
-            <ChevronRightIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 w-8 p-0"
-            onClick={() => setPage(pageCount)}
-            disabled={!canNextPage}
-          >
-            <span className="sr-only">Go to last page</span>
-            <DoubleArrowRightIcon className="h-4 w-4" />
-          </Button>
-        </div>
+        <TablePagination
+          page={page}
+          setPage={setPage}
+          rowsCount={data.length}
+          offset={numberOfRows}
+        />
       )}
     </>
   );
