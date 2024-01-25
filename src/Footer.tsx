@@ -2,7 +2,7 @@ const ALPHA_URL = 'https://www.alphavantage.co/';
 
 function Footer() {
   return (
-    <footer className="h-[150px] self-stretch flex flex-col items-center justify-evenly">
+    <footer className="h-[150px] self-stretch flex flex-col items-center justify-evenly bg-primary text-secondary">
       <div className="max-w-screen-sm text-center">
         This project depends on the{' '}
         <a href={ALPHA_URL} className="underline visited:underline">

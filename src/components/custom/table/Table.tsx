@@ -33,7 +33,7 @@ function CustomTable({ data, numberOfRows = 25 }: TableProps) {
   }, [data, numberOfRows, page]);
 
   return (
-    <div className="grow self-stretch my-8">
+    <div className="grow self-stretch my-8 px-4">
       <div className="max-w-screen-md mx-auto rounded-md border">
         <Table>
           <TableCaption className="mb-2">{CAPTION}</TableCaption>
