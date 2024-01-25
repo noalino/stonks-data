@@ -10,6 +10,7 @@ import AutoComplete, {
   type ForwardInputRef,
 } from '@/components/custom/autocomplete/AutoComplete';
 import Table from '@/components/custom/table/Table';
+import TableSkeleton from '@/components/custom/table/TableSkeleton';
 import { monthlyTimeSeries, search, type DataItem } from './api';
 import Header from './Header';
 import Footer from './Footer';
@@ -119,7 +120,7 @@ function App() {
     <div className="min-h-screen flex flex-col items-center px-4">
       <Header />
 
-      <div className="relative grow">
+      <div className="relative">
         <Form {...form}>
           <form onSubmit={handleSubmit(onSubmit)} className="flex h-12">
             <FormField
@@ -162,7 +163,11 @@ function App() {
         )}
       </div>
 
-      {!!tableData && <Table data={tableData} />}
+      {tableData && tableData.length > 0 ? (
+        <Table data={tableData} />
+      ) : (
+        <TableSkeleton />
+      )}
 
       <Footer />
     </div>
