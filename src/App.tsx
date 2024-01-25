@@ -11,6 +11,8 @@ import AutoComplete, {
 } from '@/components/custom/autocomplete/AutoComplete';
 import Table from '@/components/custom/table/Table';
 import { monthlyTimeSeries, search, type DataItem } from './api';
+import Header from './Header';
+import Footer from './Footer';
 
 const formSchema = z.object({
   symbol: z.string().trim().min(1),
@@ -114,8 +116,10 @@ function App() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center">
-      <div className="relative">
+    <div className="min-h-screen flex flex-col items-center px-4">
+      <Header />
+
+      <div className="relative grow">
         <Form {...form}>
           <form onSubmit={handleSubmit(onSubmit)} className="flex h-12">
             <FormField
@@ -159,6 +163,8 @@ function App() {
       </div>
 
       {!!tableData && <Table data={tableData} />}
+
+      <Footer />
     </div>
   );
 }

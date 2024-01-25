@@ -30,7 +30,7 @@ function TablePagination({
   }, [rowsCount, offset, page]);
 
   return (
-    <div className="flex items-center justify-end space-x-2 py-4">
+    <div className="flex items-center justify-center space-x-2 py-4">
       <Button
         variant="outline"
         className="h-8 w-8 p-0"
