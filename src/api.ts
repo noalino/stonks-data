@@ -10,16 +10,15 @@ export type SearchMatch = {
   '9. matchScore': string;
 };
 
-export type MonthlyTimeSeries = Record<
-  string,
-  {
-    '1. open': string;
-    '2. high': string;
-    '3. low': string;
-    '4. close': string;
-    '5. volume': string;
-  }
->;
+export type DataItem = {
+  '1. open': string;
+  '2. high': string;
+  '3. low': string;
+  '4. close': string;
+  '5. volume': string;
+};
+
+export type MonthlyTimeSeries = Record<string, DataItem>;
 
 type SearchResponse = {
   bestMatches: SearchMatch[];

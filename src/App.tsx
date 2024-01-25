@@ -9,7 +9,8 @@ import AutoComplete, {
   type AutoCompleteListItem,
   type ForwardInputRef,
 } from '@/components/custom/autocomplete/AutoComplete';
-import { monthlyTimeSeries, search } from './api';
+import Table from '@/components/custom/table/Table';
+import { monthlyTimeSeries, search, type DataItem } from './api';
 
 const formSchema = z.object({
   symbol: z.string().trim().min(1),
@@ -24,6 +25,7 @@ function App() {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitDisabled, setIiSubmitDisabled] = useState(true);
+  const [tableData, setTableData] = useState<[string, DataItem][]>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -90,8 +92,8 @@ function App() {
           symbol,
           newTimeSeriesAbortController.signal
         );
-        // Transform rawResults to display in table
-        // Set data from useState here
+        const results = Object.entries(rawResults ?? []);
+        setTableData(results.filter((_, index) => index < 25));
       } catch (err) {
         if (typeof err === 'string') {
           setErrorMessage(err);
@@ -155,6 +157,8 @@ function App() {
           <p className="absolute text-red-500">{errorMessage}</p>
         )}
       </div>
+
+      {!!tableData && <Table data={tableData} />}
     </div>
   );
 }
